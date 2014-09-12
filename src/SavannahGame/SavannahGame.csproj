@@ -38,13 +38,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animal.cs" />
+    <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="Event.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Gender.cs" />
     <Compile Include="Grass.cs" />
     <Compile Include="Lion.cs" />
+    <Compile Include="MoveEvent.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rabbit.cs" />
+    <Compile Include="Savannah.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

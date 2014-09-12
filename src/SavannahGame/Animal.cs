@@ -1,36 +1,31 @@
 ﻿namespace SavannahGame
 {
-    abstract class Animal
+    internal abstract class Animal
     {
         private readonly Gender gender;
-        private double weight;
 
         protected Animal(Gender gender)
         {
             this.gender = gender;
-            this.weight = 1.0;
         }
 
         public Gender Gender
         {
-            get { return gender; }
+            get { return this.gender; }
         }
 
-        public double Weight
-        {
-            get { return weight; }
-        }
+        public double Weight { get; private set; }
 
         public abstract int Moves { get; }
 
         public void GainWeight(double weightGained)
         {
-            weight += weightGained;
+            Weight += weightGained;
         }
 
         public void LoseWeight(double weightLost)
         {
-            weight -= weightLost;
+            Weight -= weightLost;
         }
     }
 }

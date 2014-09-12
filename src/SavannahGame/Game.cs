@@ -4,91 +4,61 @@ namespace SavannahGame
 {
     class Game
     {
-        private const int Size = 20;
-        private readonly Animal[,] animals;
-
         private readonly Random random;
-        private readonly Grass[,] savannah;
+        private readonly Savannah savannah;
 
         public Game()
         {
             this.random = new Random();
-            this.savannah = new Grass[Size, Size];
-            this.animals = new Animal[Size, Size];
+            this.savannah = new Savannah();
+        }
 
-            for (int row = 0; row < Size; row++)
-            {
-                for (int column = 0; column < Size; column++)
-                {
-                    this.savannah[row, column] = new Grass(this.random.NextDouble() < 0.10);
-
-                    double x = this.random.NextDouble();
-                    var gender = (Gender) this.random.Next(0, 2);
-
-                    if (x < 0.01)
-                    {
-                        this.animals[row, column] = new Lion(gender);
-                    }
-                    else if (x < 0.02)
-                    {
-                        this.animals[row, column] = new Rabbit(gender);
-                    }
-                }
-            }
+        public Savannah Savannah
+        {
+            get { return this.savannah; }
         }
 
         public void Tick()
         {
             // Move phase.
-            for (int row = 0; row < Size; row++)
+            for (int row = 0; row < Savannah.Size; row++)
             {
-                for (int column = 0; column < Size; column++)
+                for (int column = 0; column < Savannah.Size; column++)
                 {
-                    Animal animal = this.animals[row, column];
+                    Animal animal = this.savannah.GetAnimal(row, column);
 
                     if (animal == null)
                     {
                         continue;
                     }
 
-                    int x = column;
-                    int y = row;
-
-                    for (int move = 0; move < animal.Moves; move++)
+                    //for (int move = 0; move < 1; move++)
                     {
                         int dx = this.random.Next(-1, 2);
                         int dy = this.random.Next(-1, 2);
-                        int newX = Wrap(column + dx, 20);
-                        int newY = Wrap(row + dy, 20);
-
-                        if (this.animals[newY, newX] != null)
+                        
+                        try
                         {
-                            continue;
+                            savannah.Move(animal, column, row, dx, dy);
                         }
-
-                        this.animals[y, x] = null;
-                        this.animals[newY, newX] = animal;
-
-                        x = newX;
-                        y = newY;
+                        catch (InvalidOperationException)
+                        {
+                        }
                     }
                 }
             }
-            
-            for (int row = 0; row < Size; row++)
+
+            foreach (var grass in savannah.Grass)
             {
-                for (int column = 0; column < Size; column++)
-                {
-                    savannah[row, column].Tick();
-                }
+                grass.Tick();
             }
 
             // Action phase.
-            for (int row = 0; row < Size; row++)
+            for (int row = 0; row < Savannah.Size; row++)
             {
-                for (int column = 0; column < Size; column++)
+                for (int column = 0; column < Savannah.Size; column++)
                 {
-                    Animal animal = this.animals[row, column];
+                    Animal animal = this.savannah.GetAnimal(row, column);
 
                     if (animal == null)
                     {
@@ -106,16 +76,27 @@ namespace SavannahGame
                                     continue;
                                 }
 
-                                int x = Wrap(column + dx, Size);
-                                int y = Wrap(row + dy, Size);
+                                int x = column + dx;
+                                int y = row + dy;
 
-                                Animal other = this.animals[y, x];
+                                if ((x < 0 || x >= Savannah.Size) ||
+                                    (y < 0 || y >= Savannah.Size))
+                                {
+                                    continue;
+                                }
+
+                                Animal other = savannah.GetAnimal(y, x);
 
                                 if (other is Lion)
                                 {
                                     var gender = (Gender) this.random.Next(0, 2);
                                     var cub = new Lion(gender);
-                                    Spawn(cub);
+                                    //Spawn(cub);
+                                }
+                                else if (other is Rabbit)
+                                {
+                                    animal.GainWeight(other.Weight * 0.50);
+                                    savannah.Kill((Lion) animal, (Rabbit) other, row + dy, column + dx);
                                 }
                             }
                         }
@@ -131,11 +112,17 @@ namespace SavannahGame
                                     continue;
                                 }
 
-                                int x = Wrap(column + dx, Size);
-                                int y = Wrap(row + dy, Size);
+                                int x = column + dx;
+                                int y = row + dy;
 
-                                Grass grass = this.savannah[y, x];
-                                Animal other = this.animals[y, x];
+                                if ((x < 0 || x >= Savannah.Size) ||
+                                    (y < 0 || y >= Savannah.Size))
+                                {
+                                    continue;
+                                }
+
+                                Grass grass = this.savannah.GetGrass(y, x);
+                                Animal other = this.savannah.GetAnimal(y, x);
 
                                 if (grass.IsAlive)
                                 {
@@ -147,85 +134,19 @@ namespace SavannahGame
                                 {
                                     var gender = (Gender) this.random.Next(0, 2);
                                     var bunny = new Rabbit(gender);
-                                    Spawn(bunny);
+                                    savannah.Spawn(bunny);
                                 }
                             }
                         }
                     }
-                }
-            }
-        }
 
-        private void Spawn<T>(T animal) where T : Animal
-        {
-            int column = this.random.Next(0, Size);
-            int row = this.random.Next(0, Size);
+                    animal.LoseWeight(animal.Weight * 0.05);
 
-            if (this.animals[row, column] == null)
-            {
-                this.animals[row, column] = animal;                
-            }
-        }
-
-        public void Draw()
-        {
-            Console.SetCursorPosition(0, 0);
-            Console.ResetColor();
-
-            for (int row = 0; row < Size; row++)
-            {
-                for (int column = 0; column < Size; column++)
-                {
-                    Console.ResetColor();
-
-                    if (this.savannah[row, column].IsAlive)
+                    if (animal.Weight < 0.25)
                     {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write("#");
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write(".");
                     }
                 }
-
-                Console.WriteLine();
             }
-
-            Console.SetCursorPosition(0, 0);
-
-            for (int row = 0; row < Size; row++)
-            {
-                for (int column = 0; column < Size; column++)
-                {
-                    Console.ResetColor();
-
-                    Animal animal = this.animals[row, column];
-
-                    if (animal is Lion)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.Write("L");
-                    }
-                    else if (animal is Rabbit)
-                    {
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine("R");
-                    }
-                    else
-                    {
-                        Console.SetCursorPosition(column, row);
-                    }
-                }
-
-                Console.WriteLine();
-            }
-        }
-
-        private int Wrap(int x, int max)
-        {
-            return ((x % max) + max) % max;
         }
     }
 }

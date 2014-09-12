@@ -5,7 +5,7 @@
         public Rabbit(Gender gender)
             : base(gender)
         {
-            GainWeight(2.5);
+            GainWeight(10.0);
         }
 
         public override int Moves

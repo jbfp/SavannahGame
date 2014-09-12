@@ -5,7 +5,7 @@
         public Lion(Gender gender)
             : base(gender)
         {
-            GainWeight(50.0);
+            GainWeight(150.0);
         }
 
         public override int Moves
