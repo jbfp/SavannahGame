@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 
 namespace SavannahGame
@@ -14,7 +15,7 @@ namespace SavannahGame
             while (true)
             {
                 game.Tick();
-
+                var state = game.GetCurrentState();
 
                 Console.SetCursorPosition(0, 0);
                 Console.ResetColor();
@@ -25,16 +26,15 @@ namespace SavannahGame
                     {
                         Console.ResetColor();
 
-                        if (game.Savannah.GetGrass(row, column)
-                                .IsAlive)
+                        if (state.Savannah[row, column].IsAlive)
                         {
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.Write("#");
                         }
                         else
                         {
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.Write(".");
+                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                            Console.Write("·");
                         }
                     }
 
@@ -50,7 +50,7 @@ namespace SavannahGame
                     {
                         Console.ResetColor();
 
-                        Animal animal = game.Savannah.GetAnimal(row, column);
+                        Animal animal = state.Animals[row, column];
 
                         if (animal is Lion)
                         {
@@ -66,7 +66,7 @@ namespace SavannahGame
                         else if (animal is Rabbit)
                         {
                             Console.ForegroundColor = ConsoleColor.White;
-                            Console.WriteLine("R");
+                            Console.Write("R");
                         }
                         else
                         {
@@ -78,10 +78,10 @@ namespace SavannahGame
                 }
 
                 Console.ResetColor();
-                Console.SetCursorPosition(Savannah.Size + 1, 0);
-                Console.WriteLine("Rabbits: {0}", game.Savannah.Rabbits.Count);
-                Console.SetCursorPosition(Savannah.Size + 1, 1);
-                Console.WriteLine("Lions: {0}", game.Savannah.Lions.Count);
+                Console.SetCursorPosition(Savannah.Size * 2 + 1, 0);
+                Console.WriteLine("Rabbits: {0}", state.Animals.OfType<Rabbit>().Count());
+                Console.SetCursorPosition(Savannah.Size * 2 + 1, 1);
+                Console.WriteLine("Lions: {0}", state.Animals.OfType<Lion>().Count());
 
 //                Console.Clear();
 //                Console.WriteLine(@"     __ __            __   __ 

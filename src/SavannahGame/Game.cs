@@ -13,9 +13,9 @@ namespace SavannahGame
             this.savannah = new Savannah();
         }
 
-        public Savannah Savannah
+        public SavannahState GetCurrentState()
         {
-            get { return this.savannah; }
+            return savannah.GetCurrenState();
         }
 
         public void Tick()
@@ -48,16 +48,14 @@ namespace SavannahGame
                 }
             }
 
-            foreach (var grass in savannah.Grass)
-            {
-                grass.Tick();
-            }
-
             // Action phase.
             for (int row = 0; row < Savannah.Size; row++)
             {
                 for (int column = 0; column < Savannah.Size; column++)
                 {
+                    // Update grass.
+                    this.savannah.GetGrass(row, column).Tick();
+
                     Animal animal = this.savannah.GetAnimal(row, column);
 
                     if (animal == null)
@@ -91,7 +89,7 @@ namespace SavannahGame
                                 {
                                     var gender = (Gender) this.random.Next(0, 2);
                                     var cub = new Lion(gender);
-                                    //Spawn(cub);
+                                    this.savannah.Spawn(cub);                                    
                                 }
                                 else if (other is Rabbit)
                                 {
@@ -134,7 +132,7 @@ namespace SavannahGame
                                 {
                                     var gender = (Gender) this.random.Next(0, 2);
                                     var bunny = new Rabbit(gender);
-                                    savannah.Spawn(bunny);
+                                    this.savannah.Spawn(bunny);
                                 }
                             }
                         }
@@ -144,9 +142,11 @@ namespace SavannahGame
 
                     if (animal.Weight < 0.25)
                     {
+                        this.savannah.Starve(animal, row, column);
                     }
                 }
             }
         }
     }
+
 }

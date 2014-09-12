@@ -8,10 +8,10 @@ namespace SavannahGame
     {
         public const int Size = 20;
 
+        private readonly Animal[,] animals;
+        private readonly Queue<Event> events;
         private readonly Random random;
         private readonly Grass[,] savannah;
-        private readonly Animal[,] animals;
-        private readonly Queue<Event> events; 
 
         public Savannah()
         {
@@ -26,9 +26,9 @@ namespace SavannahGame
                     this.savannah[row, column] = new Grass(this.random.NextDouble() < 0.10, false);
 
                     double x = this.random.NextDouble();
-                    var gender = (Gender)this.random.Next(0, 2);
+                    var gender = (Gender) this.random.Next(0, 2);
 
-                    if (x < 0.02)
+                    if (x < 0.010)
                     {
                         this.animals[row, column] = new Lion(gender);
                     }
@@ -45,21 +45,6 @@ namespace SavannahGame
         public IReadOnlyList<Event> Events
         {
             get { return this.events.ToList().AsReadOnly(); }
-        } 
-
-        public IReadOnlyCollection<Rabbit> Rabbits
-        {
-            get { return this.animals.OfType<Rabbit>().ToList().AsReadOnly(); }
-        }
-
-        public IReadOnlyCollection<Lion> Lions
-        {
-            get { return this.animals.OfType<Lion>().ToList().AsReadOnly(); }
-        }
-
-        public IReadOnlyCollection<Grass> Grass
-        {
-            get { return this.savannah.OfType<Grass>().ToList().AsReadOnly(); }
         }
 
         public void Spawn<T>(T animal) where T : Animal
@@ -71,16 +56,20 @@ namespace SavannahGame
             {
                 this.animals[row, column] = animal;
             }
+
+            var spawnEvent = new SpawnEvent(animal, row, column);
+            Apply(spawnEvent);
+            this.events.Enqueue(spawnEvent);
         }
 
         public Grass GetGrass(int row, int column)
         {
-            return savannah[row, column];
+            return this.savannah[row, column];
         }
 
         public Animal GetAnimal(int row, int column)
         {
-            return animals[row, column];
+            return this.animals[row, column];
         }
 
         public void Move<T>(T animal, int x, int y, int dx, int dy) where T : Animal
@@ -99,64 +88,83 @@ namespace SavannahGame
                 string message = string.Format("({0}, {1}) is occupied.", newX.ToString(), newY.ToString());
                 throw new InvalidOperationException(message);
             }
-            
+
             var moveEvent = new MoveEvent(animal, x, y, dx, dy);
-            events.Enqueue(moveEvent);
             Apply(moveEvent);
+            this.events.Enqueue(moveEvent);
         }
 
         public void Kill(Lion predator, Rabbit victim, int row, int column)
         {
+            if (predator == null)
+            {
+                throw new ArgumentNullException("predator");
+            }
+
+            if (victim == null)
+            {
+                throw new ArgumentNullException("victim");
+            }
+
+            if ((row < 0 || row >= Size) ||
+                (column < 0 || column >= Size))
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
             var killEvent = new KillEvent(predator, victim, row, column);
-            events.Enqueue(killEvent);
             Apply(killEvent);
+            this.events.Enqueue(killEvent);
+        }
+
+        public void Starve<T>(T animal, int row, int column) where T : Animal
+        {
+            if (animal == null)
+            {
+                throw new ArgumentNullException("animal");
+            }
+
+            if (this.animals[row, column] == null)
+            {
+                string message = string.Format("No animal found at ({0}, {1}).", column.ToString(), row.ToString());
+                throw new InvalidOperationException(message);
+            }
+
+            if ((row < 0 || row >= Size) ||
+                (column < 0 || column >= Size))
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            var starveEvent = new StarveEvent(animal, row, column);
+            Apply(starveEvent);
+            this.events.Enqueue(starveEvent);
+        }
+
+        private void Apply(StarveEvent e)
+        {
+            this.animals[e.Row, e.Column] = null;
+        }
+
+        private void Apply(SpawnEvent e)
+        {
+            this.animals[e.Row, e.Column] = e.Spawn;
         }
 
         private void Apply(KillEvent e)
         {
-            animals[e.Row, e.Column] = null;
+            this.animals[e.Row, e.Column] = null;
         }
 
         private void Apply(MoveEvent e)
         {
-            animals[e.Y, e.X] = null;
-            animals[e.Y + e.DeltaY, e.X + e.DeltaX] = e.Animal;
-        }
-    }
-
-    class KillEvent : Event
-    {
-        private readonly Lion predator;
-        private readonly Rabbit prey;
-        private readonly int row;
-        private readonly int column;
-
-        public KillEvent(Lion predator, Rabbit prey, int row, int column)
-        {
-            this.predator = predator;
-            this.prey = prey;
-            this.row = row;
-            this.column = column;
+            this.animals[e.Y, e.X] = null;
+            this.animals[e.Y + e.DeltaY, e.X + e.DeltaX] = e.Animal;
         }
 
-        public Lion Predator
+        public SavannahState GetCurrenState()
         {
-            get { return this.predator; }
-        }
-
-        public Rabbit Prey
-        {
-            get { return this.prey; }
-        }
-
-        public int Row
-        {
-            get { return this.row; }
-        }
-
-        public int Column
-        {
-            get { return this.column; }
+            return new SavannahState(this.savannah, this.animals);
         }
     }
 }
