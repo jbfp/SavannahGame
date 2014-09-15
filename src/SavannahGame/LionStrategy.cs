@@ -2,7 +2,7 @@ using System;
 
 namespace SavannahGame
 {
-    class LionStrategy : IAnimalStrategy
+    class LionStrategy
     {
         private static readonly Random Random = new Random();
 
@@ -22,17 +22,27 @@ namespace SavannahGame
                 return;
             }
 
-            if (other is Lion && other.Gender != this.lion.Gender && lion.Weight >= lion.MinWeight && other.Weight >= other.MinWeight)
+            var otherLion = other as Lion;
+
+            if (otherLion != null && other.Gender != this.lion.Gender && lion.Weight >= lion.MinWeight && other.Weight >= other.MinWeight)
             {
-                var gender = (Gender) Random.Next(0, 2);
-                var cub = new Lion(gender);
-                savannah.Spawn(cub);
+                this.lion.Meet(otherLion);                
             }
-            else if (other is Rabbit)
+            else
             {
-                this.lion.GainWeight(other.Weight * 0.50);
-                savannah.Kill(this.lion, (Rabbit) other, row, column);
+                var rabbit = other as Rabbit;
+
+                if (rabbit != null)
+                {
+                    this.lion.Eat(rabbit);
+                    savannah.Remove(rabbit);
+                }
             }
+        }
+
+        public void Execute(Lion animal, Savannah savannah, int row, int column)
+        {
+            throw new NotImplementedException();
         }
     }
 }

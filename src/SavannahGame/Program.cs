@@ -11,7 +11,7 @@ namespace SavannahGame
         {
             Console.CursorVisible = false;
 
-            var game = new Game(new AnimalStrategyFactory());
+            var game = new Game();
 
             int animalsStarved = 0;
             int rabbitsEaten = 0;
@@ -20,11 +20,7 @@ namespace SavannahGame
             while (true)
             {
                 game.Tick();
-                var state = game.GetCurrentState();
-
-                animalsStarved += state.Stats.AnimalsStarved;
-                rabbitsEaten += state.Stats.RabbitsEaten;
-                grassEaten += state.Stats.GrassEaten;
+                var state = game.GetSavannahState();
 
                 Console.SetCursorPosition(0, 0);
                 Console.ResetColor();
@@ -35,15 +31,15 @@ namespace SavannahGame
                     {
                         Console.ResetColor();
 
-                        if (state.SavannahState.Savannah[row, column].IsAlive)
+                        if (state.Savannah[row, column].IsAlive)
                         {
                             Console.ForegroundColor = ConsoleColor.Green;
-                            Console.Write("# ");
+                            Console.Write("#");
                         }
                         else
                         {
                             Console.ForegroundColor = ConsoleColor.DarkYellow;
-                            Console.Write("· ");
+                            Console.Write("·");
                         }
                     }
 
@@ -59,7 +55,7 @@ namespace SavannahGame
                     {
                         Console.ResetColor();
 
-                        Animal animal = state.SavannahState.Animals[row, column];
+                        Animal animal = state.Animals[row, column];
 
                         if (animal is Lion)
                         {
@@ -78,7 +74,7 @@ namespace SavannahGame
                                     break;
                             }
 
-                            Console.Write("L ");
+                            Console.Write("L");
                         }
                         else if (animal is Rabbit)
                         {
@@ -92,30 +88,30 @@ namespace SavannahGame
                                     break;
                             }
 
-                            Console.Write("R ");
+                            Console.Write("R");
                         }
                         else
                         {
-                            Console.SetCursorPosition(column + 1, row);
+                            Console.SetCursorPosition(column, row);
                         }
                     }
 
                     Console.WriteLine();
                 }
 
-                //Console.ResetColor();
-                //Console.SetCursorPosition(Savannah.Size + 1, 0);
-                //Console.ForegroundColor = ConsoleColor.White;
-                //var rabbits = state.SavannahState.Animals.OfType<Rabbit>().ToList();
-                //var rabbitMessage = string.Format("Rabbits: {0} ({1})", rabbits.Count.ToString("D3"), GetFormattedGenderString(rabbits));
-                //Console.Write(new string(' ', Console.WindowWidth - 21));
-                //Console.SetCursorPosition(Savannah.Size + 1, 0);
-                //Console.Write(rabbitMessage);
-                //Console.SetCursorPosition(Savannah.Size + 1, 1);
-                //Console.ForegroundColor = ConsoleColor.Cyan;                
-                //var lions = state.SavannahState.Animals.OfType<Lion>().ToList();
-                //Console.WriteLine("Lions:   {0} ({1})", lions.Count.ToString("D3"), GetFormattedGenderString(lions));                
-                //Console.ResetColor();
+                Console.ResetColor();
+                Console.SetCursorPosition(Savannah.Size + 1, 0);
+                Console.ForegroundColor = ConsoleColor.White;
+                var rabbits = state.Animals.OfType<Rabbit>().ToList();
+                var rabbitMessage = string.Format("Rabbits: {0} ({1})", rabbits.Count.ToString("D3"), GetFormattedGenderString(rabbits));
+                Console.Write(new string(' ', Console.WindowWidth - 21));
+                Console.SetCursorPosition(Savannah.Size + 1, 0);
+                Console.Write(rabbitMessage);
+                Console.SetCursorPosition(Savannah.Size + 1, 1);
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                var lions = state.Animals.OfType<Lion>().ToList();
+                Console.WriteLine("Lions:   {0} ({1})", lions.Count.ToString("D3"), GetFormattedGenderString(lions));
+                Console.ResetColor();
                 //Console.SetCursorPosition(Savannah.Size + 1, 3);
                 //Console.WriteLine("Animals starved: {0} / {1}", state.Stats.AnimalsStarved.ToString("D3"), animalsStarved.ToString("D3"));
                 //Console.SetCursorPosition(Savannah.Size + 1, 4);

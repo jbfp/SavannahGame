@@ -6,28 +6,20 @@ namespace SavannahGame
 {
     class Game
     {
-        private readonly AnimalStrategyFactory animalStrategyFactory;
-        private readonly Random random;
+        private static readonly Random Random = new Random();
+
         private readonly Savannah savannah;
-        private readonly List<Animal> updatedAnimals; 
+        private readonly List<Animal> updatedAnimals;
 
-        private int animalsStarvedTick;
-        private int rabbitsEatenTick;
-        private int grassEatenTick;
-
-        public Game(AnimalStrategyFactory animalStrategyFactory)
+        public Game()
         {
-            this.animalStrategyFactory = animalStrategyFactory;
-            this.random = new Random();
             this.savannah = new Savannah();
-            this.updatedAnimals = new List<Animal>(Savannah.Size * Savannah.Size);
+            this.updatedAnimals = new List<Animal>(this.savannah.Rows * this.savannah.Columns);
         }
 
-        public GameState GetCurrentState()
+        public SavannahState GetSavannahState()
         {
-            var savannahState = savannah.GetCurrenState();
-            var stats = new Stats(this.animalsStarvedTick, this.rabbitsEatenTick, this.grassEatenTick);
-            return new GameState(savannahState, stats);
+            return this.savannah.GetCurrenState();
         }
 
         public void Tick()
@@ -35,9 +27,9 @@ namespace SavannahGame
             this.updatedAnimals.Clear();
 
             // Move phase.
-            for (int row = 0; row < Savannah.Size; row++)
+            for (int row = 0; row < this.savannah.Rows; row++)
             {
-                for (int column = 0; column < Savannah.Size; column++)
+                for (int column = 0; column < this.savannah.Columns; column++)
                 {
                     Animal animal = this.savannah.GetAnimal(row, column);
 
@@ -48,17 +40,17 @@ namespace SavannahGame
 
                     for (int move = 0; move < animal.Moves; move++)
                     {
-                        int dx = this.random.Next(-1, 2);
-                        int dy = this.random.Next(-1, 2);
-                        savannah.Move(animal, column, row, dx, dy);
+                        int dx = Random.Next(-1, 2);
+                        int dy = Random.Next(-1, 2);
+                        this.savannah.Move(animal, dy, dx);
                     }
                 }
             }
 
             // Action phase.
-            for (int row = 0; row < Savannah.Size; row++)
+            for (int row = 0; row < this.savannah.Rows; row++)
             {
-                for (int column = 0; column < Savannah.Size; column++)
+                for (int column = 0; column < this.savannah.Columns; column++)
                 {
                     // Update grass.
                     this.savannah.GetGrass(row, column).Tick();
@@ -79,39 +71,87 @@ namespace SavannahGame
                     animal.LoseWeight(animal.Weight * 0.10);
 
                     // Dies from overpopulation or starvation?
-                    const int max = Savannah.Size * Savannah.Size;
-                    var animals = this.savannah.Animals.Count(a => a.GetType() == animal.GetType());
-                    var k = this.random.NextDouble();
-                    var dies = animal.Weight < animal.MinWeight || k < (2.0 * animals / max) || animal.Age > this.random.Next(5, 20);
+                    int max = this.savannah.Rows * this.savannah.Columns;
+                    int animals = this.savannah.Animals.Count(a => a.GetType() == animal.GetType());
+                    double k = Random.NextDouble();
+                    bool dies = animal.Weight < animal.MinWeight || k < (1.0 * animals / max) || animal.Age > Random.Next(5, 20);
 
                     if (dies)
                     {
-                        this.savannah.Starve(animal, row, column);
+                        this.savannah.Remove(animal);
                         continue;
                     }
-
-                    var strategy = animalStrategyFactory.GetStrategy(animal);
 
                     for (int dy = -1; dy <= 1; dy++)
                     {
                         for (int dx = -1; dx <= 1; dx++)
                         {
-                            int x = column + dx;
-                            int y = row + dy;
-
-                            if ((x < 0 || x >= Savannah.Size) ||
-                                (y < 0 || y >= Savannah.Size))
+                            if (dy == 0 && dx == 0)
                             {
                                 continue;
                             }
 
-                            strategy.Execute(savannah, y, x);
+                            int x = column + dx;
+                            int y = row + dy;
+
+                            if ((x < 0 || x >= this.savannah.Columns) ||
+                                (y < 0 || y >= this.savannah.Rows))
+                            {
+                                continue;
+                            }
+
+                            Grass grass = this.savannah.GetGrass(y, x);
+                            Animal other = this.savannah.GetAnimal(y, x);
+                            var tile = new Tile(grass, other);
+
+                            animal.Visit(tile);
                         }
                     }
 
                     this.updatedAnimals.Add(animal);
                 }
             }
+
+            // Cleanup phase.
+            for (int row = 0; row < this.savannah.Rows; row++)
+            {
+                for (int column = 0; column < this.savannah.Columns; column++)
+                {
+                    Animal animal = this.savannah.GetAnimal(row, column);
+
+                    if (animal == null)
+                    {
+                        continue;
+                    }
+
+                    if (animal.IsAlive == false)
+                    {
+                        this.savannah.Remove(animal);
+                    }
+                }
+            }
+        }
+    }
+
+    class Tile
+    {
+        private readonly Grass grass;
+        private readonly Animal animal;
+
+        public Tile(Grass grass, Animal animal)
+        {
+            this.grass = grass;
+            this.animal = animal;
+        }
+
+        public Grass Grass
+        {
+            get { return this.grass; }
+        }
+
+        public Animal Animal
+        {
+            get { return this.animal; }
         }
     }
 }

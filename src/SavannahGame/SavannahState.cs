@@ -1,6 +1,5 @@
 ﻿namespace SavannahGame
 {
-
     class SavannahState
     {
         private readonly Grass[,] savannah;
