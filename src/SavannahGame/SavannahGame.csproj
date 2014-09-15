@@ -41,22 +41,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animal.cs" />
-    <Compile Include="EnumerableExtensions.cs" />
-    <Compile Include="Event.cs" />
+    <Compile Include="IAnimalStrategy.cs" />
+    <Compile Include="AnimalStrategyFactory.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="Gender.cs" />
     <Compile Include="Grass.cs" />
-    <Compile Include="KillEvent.cs" />
     <Compile Include="Lion.cs" />
-    <Compile Include="MoveEvent.cs" />
+    <Compile Include="LionStrategy.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rabbit.cs" />
+    <Compile Include="RabbitStrategy.cs" />
     <Compile Include="Savannah.cs" />
     <Compile Include="SavannahState.cs" />
-    <Compile Include="SpawnEvent.cs" />
-    <Compile Include="StarveEvent.cs" />
     <Compile Include="Stats.cs" />
   </ItemGroup>
   <ItemGroup>

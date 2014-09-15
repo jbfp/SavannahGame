@@ -1,20 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SavannahGame
 {
     class Game
     {
+        private readonly AnimalStrategyFactory animalStrategyFactory;
         private readonly Random random;
         private readonly Savannah savannah;
+        private readonly List<Animal> updatedAnimals; 
 
         private int animalsStarvedTick;
         private int rabbitsEatenTick;
         private int grassEatenTick;
 
-        public Game()
+        public Game(AnimalStrategyFactory animalStrategyFactory)
         {
+            this.animalStrategyFactory = animalStrategyFactory;
             this.random = new Random();
             this.savannah = new Savannah();
+            this.updatedAnimals = new List<Animal>(Savannah.Size * Savannah.Size);
         }
 
         public GameState GetCurrentState()
@@ -26,6 +32,8 @@ namespace SavannahGame
 
         public void Tick()
         {
+            this.updatedAnimals.Clear();
+
             // Move phase.
             for (int row = 0; row < Savannah.Size; row++)
             {
@@ -38,25 +46,14 @@ namespace SavannahGame
                         continue;
                     }
 
-                    //for (int move = 0; move < 1; move++)
+                    for (int move = 0; move < animal.Moves; move++)
                     {
                         int dx = this.random.Next(-1, 2);
                         int dy = this.random.Next(-1, 2);
-                        
-                        try
-                        {
-                            savannah.Move(animal, column, row, dx, dy);
-                        }
-                        catch (InvalidOperationException)
-                        {
-                        }
+                        savannah.Move(animal, column, row, dx, dy);
                     }
                 }
             }
-
-            this.animalsStarvedTick = 0;
-            this.rabbitsEatenTick = 0;
-            this.grassEatenTick = 0;
 
             // Action phase.
             for (int row = 0; row < Savannah.Size; row++)
@@ -73,105 +70,46 @@ namespace SavannahGame
                         continue;
                     }
 
-                    animal.LoseWeight(animal.Weight * 0.20);
-
-                    // Starvation?
-                    if (animal.Weight < 1.0)
+                    if (this.updatedAnimals.Contains(animal))
                     {
-                        this.savannah.Starve(animal, row, column);
-                        this.animalsStarvedTick++;                        
                         continue;
                     }
-                    
-                    // Overpopulation?
+
+                    animal.GetOlder();
+                    animal.LoseWeight(animal.Weight * 0.10);
+
+                    // Dies from overpopulation or starvation?
                     const int max = Savannah.Size * Savannah.Size;
-                    var animals = animal is Lion ? this.savannah.Lions.Count : this.savannah.Rabbits.Count;
+                    var animals = this.savannah.Animals.Count(a => a.GetType() == animal.GetType());
                     var k = this.random.NextDouble();
-                    var dies = k < (animals * 2.0 / max);
+                    var dies = animal.Weight < animal.MinWeight || k < (2.0 * animals / max) || animal.Age > this.random.Next(5, 20);
 
                     if (dies)
                     {
                         this.savannah.Starve(animal, row, column);
-                        this.animalsStarvedTick++;
                         continue;
                     }
 
-                    if (animal is Lion)
+                    var strategy = animalStrategyFactory.GetStrategy(animal);
+
+                    for (int dy = -1; dy <= 1; dy++)
                     {
-                        for (int dy = -1; dy <= 1; dy++)
+                        for (int dx = -1; dx <= 1; dx++)
                         {
-                            for (int dx = -1; dx <= 1; dx++)
+                            int x = column + dx;
+                            int y = row + dy;
+
+                            if ((x < 0 || x >= Savannah.Size) ||
+                                (y < 0 || y >= Savannah.Size))
                             {
-                                if (dx == 0 && dy == 0)
-                                {
-                                    continue;
-                                }
-
-                                int x = column + dx;
-                                int y = row + dy;
-
-                                if ((x < 0 || x >= Savannah.Size) ||
-                                    (y < 0 || y >= Savannah.Size))
-                                {
-                                    continue;
-                                }
-
-                                Animal other = savannah.GetAnimal(y, x);
-
-                                if (other is Lion && other.Gender != animal.Gender)
-                                {
-                                    var gender = (Gender) this.random.Next(0, 2);
-                                    var cub = new Lion(gender);
-                                    this.savannah.Spawn(cub);                                    
-                                }
-                                else if (other is Rabbit)
-                                {
-                                    animal.GainWeight(other.Weight * 0.50);
-                                    savannah.Kill((Lion) animal, (Rabbit) other, row + dy, column + dx);
-                                    this.rabbitsEatenTick++;
-                                }
+                                continue;
                             }
+
+                            strategy.Execute(savannah, y, x);
                         }
                     }
-                    else if (animal is Rabbit)
-                    {
-                        for (int dy = -1; dy <= 1; dy++)
-                        {
-                            for (int dx = -1; dx <= 1; dx++)
-                            {
-                                if (dx == 0 && dy == 0)
-                                {
-                                    continue;
-                                }
 
-                                int x = column + dx;
-                                int y = row + dy;
-
-                                if ((x < 0 || x >= Savannah.Size) ||
-                                    (y < 0 || y >= Savannah.Size))
-                                {
-                                    continue;
-                                }
-
-                                Grass grass = this.savannah.GetGrass(y, x);
-                                Animal other = this.savannah.GetAnimal(y, x);
-
-                                if (grass.IsAlive)
-                                {
-                                    animal.GainWeight(0.50);
-                                    grass.Kill();
-                                    this.grassEatenTick++;
-                                }
-
-                                if (other is Rabbit && other.Gender != animal.Gender)
-                                {
-                                    var gender = (Gender) this.random.Next(0, 2);
-                                    var bunny = new Rabbit(gender);
-                                    this.savannah.Spawn(bunny);
-                                }
-                            }
-                        }
-                    }
+                    this.updatedAnimals.Add(animal);
                 }
             }
         }

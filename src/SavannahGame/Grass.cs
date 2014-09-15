@@ -2,37 +2,27 @@
 {
     class Grass
     {
-        private readonly bool willRevive;
+        private readonly int ttl;
 
         private int ticks;
 
-        public Grass(bool isAlive, bool willRevive)
+        public Grass(bool isAlive, int ttl)
         {
+            this.ttl = ttl;
             IsAlive = isAlive;
-            this.willRevive = willRevive;
         }
 
         public bool IsAlive { get; private set; }
 
         public void Tick()
         {
-            if (IsAlive)
+            if (++this.ticks % ttl == 0)
             {
-                return;
-            }
-
-            if (!willRevive)
-            {
-                return;
-            }
-
-            if (++this.ticks == 20)
-            {
-                //IsAlive = true;
+                IsAlive = !IsAlive;
             }
         }
 
-        public void Kill()
+        public void Deactivate()
         {
             IsAlive = false;
             this.ticks = 0;

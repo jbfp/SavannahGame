@@ -12,5 +12,15 @@
         {
             get { return 1; }
         }
+
+        public override double MinWeight
+        {
+            get { return 15.0; }
+        }
+
+        public void Eat(Rabbit rabbit)
+        {
+            GainWeight(rabbit.Weight * 0.75);
+        }
     }
 }
