@@ -7,15 +7,21 @@ namespace SavannahGame
         private readonly Random random;
         private readonly Savannah savannah;
 
+        private int animalsStarvedTick;
+        private int rabbitsEatenTick;
+        private int grassEatenTick;
+
         public Game()
         {
             this.random = new Random();
             this.savannah = new Savannah();
         }
 
-        public SavannahState GetCurrentState()
+        public GameState GetCurrentState()
         {
-            return savannah.GetCurrenState();
+            var savannahState = savannah.GetCurrenState();
+            var stats = new Stats(this.animalsStarvedTick, this.rabbitsEatenTick, this.grassEatenTick);
+            return new GameState(savannahState, stats);
         }
 
         public void Tick()
@@ -48,6 +54,10 @@ namespace SavannahGame
                 }
             }
 
+            this.animalsStarvedTick = 0;
+            this.rabbitsEatenTick = 0;
+            this.grassEatenTick = 0;
+
             // Action phase.
             for (int row = 0; row < Savannah.Size; row++)
             {
@@ -60,6 +70,29 @@ namespace SavannahGame
 
                     if (animal == null)
                     {
+                        continue;
+                    }
+
+                    animal.LoseWeight(animal.Weight * 0.20);
+
+                    // Starvation?
+                    if (animal.Weight < 1.0)
+                    {
+                        this.savannah.Starve(animal, row, column);
+                        this.animalsStarvedTick++;                        
+                        continue;
+                    }
+                    
+                    // Overpopulation?
+                    const int max = Savannah.Size * Savannah.Size;
+                    var animals = animal is Lion ? this.savannah.Lions.Count : this.savannah.Rabbits.Count;
+                    var k = this.random.NextDouble();
+                    var dies = k < (animals * 2.0 / max);
+
+                    if (dies)
+                    {
+                        this.savannah.Starve(animal, row, column);
+                        this.animalsStarvedTick++;
                         continue;
                     }
 
@@ -85,7 +118,7 @@ namespace SavannahGame
 
                                 Animal other = savannah.GetAnimal(y, x);
 
-                                if (other is Lion)
+                                if (other is Lion && other.Gender != animal.Gender)
                                 {
                                     var gender = (Gender) this.random.Next(0, 2);
                                     var cub = new Lion(gender);
@@ -95,6 +128,7 @@ namespace SavannahGame
                                 {
                                     animal.GainWeight(other.Weight * 0.50);
                                     savannah.Kill((Lion) animal, (Rabbit) other, row + dy, column + dx);
+                                    this.rabbitsEatenTick++;
                                 }
                             }
                         }
@@ -126,9 +160,10 @@ namespace SavannahGame
                                 {
                                     animal.GainWeight(0.50);
                                     grass.Kill();
+                                    this.grassEatenTick++;
                                 }
 
-                                if (other is Rabbit)
+                                if (other is Rabbit && other.Gender != animal.Gender)
                                 {
                                     var gender = (Gender) this.random.Next(0, 2);
                                     var bunny = new Rabbit(gender);
@@ -137,16 +172,8 @@ namespace SavannahGame
                             }
                         }
                     }
-
-                    animal.LoseWeight(animal.Weight * 0.05);
-
-                    if (animal.Weight < 0.25)
-                    {
-                        this.savannah.Starve(animal, row, column);
-                    }
                 }
             }
         }
     }
-
 }

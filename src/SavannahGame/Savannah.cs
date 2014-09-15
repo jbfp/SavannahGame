@@ -23,16 +23,16 @@ namespace SavannahGame
             {
                 for (int column = 0; column < Size; column++)
                 {
-                    this.savannah[row, column] = new Grass(this.random.NextDouble() < 0.10, false);
+                    this.savannah[row, column] = new Grass(this.random.NextDouble() < 0.50, false);
 
                     double x = this.random.NextDouble();
                     var gender = (Gender) this.random.Next(0, 2);
 
-                    if (x < 0.010)
+                    if (x < 0.05)
                     {
                         this.animals[row, column] = new Lion(gender);
                     }
-                    else if (x < 0.030)
+                    else if (x < 0.20)
                     {
                         this.animals[row, column] = new Rabbit(gender);
                     }
@@ -47,7 +47,17 @@ namespace SavannahGame
             get { return this.events.ToList().AsReadOnly(); }
         }
 
-        public void Spawn<T>(T animal) where T : Animal
+        public IReadOnlyCollection<Lion> Lions
+        {
+            get { return this.animals.OfType<Lion>().ToList().AsReadOnly(); }
+        }
+
+        public IReadOnlyCollection<Rabbit> Rabbits
+        {
+            get { return this.animals.OfType<Rabbit>().ToList().AsReadOnly(); }
+        }
+
+        public void Spawn(Animal animal)
         {
             int column = this.random.Next(0, Size);
             int row = this.random.Next(0, Size);
@@ -72,7 +82,7 @@ namespace SavannahGame
             return this.animals[row, column];
         }
 
-        public void Move<T>(T animal, int x, int y, int dx, int dy) where T : Animal
+        public void Move(Animal animal, int x, int y, int dx, int dy)
         {
             int newX = x + dx;
             int newY = y + dy;
@@ -117,7 +127,7 @@ namespace SavannahGame
             this.events.Enqueue(killEvent);
         }
 
-        public void Starve<T>(T animal, int row, int column) where T : Animal
+        public void Starve(Animal animal, int row, int column)
         {
             if (animal == null)
             {

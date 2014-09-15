@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>SavannahGame.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -41,6 +44,7 @@
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Event.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="GameState.cs" />
     <Compile Include="Gender.cs" />
     <Compile Include="Grass.cs" />
     <Compile Include="KillEvent.cs" />
@@ -53,6 +57,7 @@
     <Compile Include="SavannahState.cs" />
     <Compile Include="SpawnEvent.cs" />
     <Compile Include="StarveEvent.cs" />
+    <Compile Include="Stats.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
