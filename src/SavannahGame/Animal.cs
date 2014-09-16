@@ -1,6 +1,6 @@
 ﻿namespace SavannahGame
 {
-    internal abstract class Animal
+    public abstract class Animal
     {
         private readonly Gender gender;
 
@@ -8,7 +8,6 @@
         {
             this.gender = gender;
             GainWeight(weight);
-            IsAlive = true;
         }
 
         public Gender Gender
@@ -16,7 +15,6 @@
             get { return this.gender; }
         }
 
-        public bool IsAlive { get; private set; }
         public double Weight { get; private set; }
         public int Age { get; private set; }
 
@@ -38,6 +36,12 @@
             Weight -= weightLost;
         }
 
-        public abstract void Visit(Tile tile);
+        public virtual void Meet(Grass grass)
+        {
+        }
+
+        public virtual void Meet(Animal animal)
+        {
+        }
     }
 }

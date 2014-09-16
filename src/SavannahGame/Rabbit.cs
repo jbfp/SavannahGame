@@ -2,13 +2,13 @@
 
 namespace SavannahGame
 {
-    class Rabbit : Animal
+    public class Rabbit : Animal
     {
         private static readonly Random Random = new Random();
 
-        private readonly IAnimalMediator mediator;
+        private readonly IFoodChain mediator;
 
-        public Rabbit(IAnimalMediator mediator, Gender gender)
+        public Rabbit(IFoodChain mediator, Gender gender)
             : base(gender, 15.0)
         {
             this.mediator = mediator;
@@ -24,7 +24,7 @@ namespace SavannahGame
             get { return 2.5; }
         }
 
-        public void Meet(Grass grass)
+        public override void Meet(Grass grass)
         {
             if (grass == null)
             {
@@ -38,53 +38,24 @@ namespace SavannahGame
 
             GainWeight(1.00);
             grass.Deactivate();
+            base.Meet(grass);
         }
 
-        public void Meet(Rabbit rabbit)
+        public override void Meet(Animal animal)
         {
-            if (rabbit == null)
+            if (animal is Rabbit)
             {
-                throw new ArgumentNullException("rabbit");
-            }
-
-            if (rabbit.Gender == Gender)
-            {
-                return;
-            }
-
-            var gender = (Gender) Random.Next(0, 2);
-            var bunny = new Rabbit(this.mediator, gender);
-            this.mediator.Add(bunny);
-        }
-
-        public override void Visit(Tile tile)
-        {
-            if (tile == null)
-            {
-                throw new ArgumentNullException("tile");
-            }
-
-            if (tile.Grass.IsAlive == false)
-            {
-                return;
-            }
-
-            GainWeight(1.00);
-            tile.Grass.Deactivate();
-
-            var other = tile.Animal as Rabbit;
-
-            if (other != null)
-            {
-                if (other.Gender == Gender)
+                if (animal.Gender == Gender)
                 {
                     return;
                 }
 
-                var gender = (Gender) Random.Next(0, 2);
+                var gender = (Gender)Random.Next(0, 2);
                 var bunny = new Rabbit(this.mediator, gender);
-                this.mediator.Add(bunny);
+                this.mediator.Spawn(bunny);
             }
+
+            base.Meet(animal);
         }
     }
 }

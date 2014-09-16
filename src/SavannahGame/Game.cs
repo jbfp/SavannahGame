@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SavannahGame
 {
-    class Game
+    public class Game
     {
         private static readonly Random Random = new Random();
 
@@ -17,9 +17,9 @@ namespace SavannahGame
             this.updatedAnimals = new List<Animal>(this.savannah.Rows * this.savannah.Columns);
         }
 
-        public SavannahState GetSavannahState()
+        public Savannah Savannah
         {
-            return this.savannah.GetCurrenState();
+            get { return this.savannah; }
         }
 
         public void Tick()
@@ -31,7 +31,7 @@ namespace SavannahGame
             {
                 for (int column = 0; column < this.savannah.Columns; column++)
                 {
-                    Animal animal = this.savannah.GetAnimal(row, column);
+                    Animal animal = this.savannah.Animals[row, column];
 
                     if (animal == null)
                     {
@@ -53,9 +53,9 @@ namespace SavannahGame
                 for (int column = 0; column < this.savannah.Columns; column++)
                 {
                     // Update grass.
-                    this.savannah.GetGrass(row, column).Tick();
+                    this.savannah.Grasses[row, column].Tick();
 
-                    Animal animal = this.savannah.GetAnimal(row, column);
+                    Animal animal = this.savannah.Animals[row, column];
 
                     if (animal == null)
                     {
@@ -72,13 +72,13 @@ namespace SavannahGame
 
                     // Dies from overpopulation or starvation?
                     int max = this.savannah.Rows * this.savannah.Columns;
-                    int animals = this.savannah.Animals.Count(a => a.GetType() == animal.GetType());
+                    int animals = this.savannah.Animals.OfType<Animal>().Count(a => a.GetType() == animal.GetType());
                     double k = Random.NextDouble();
-                    bool dies = animal.Weight < animal.MinWeight || k < (1.0 * animals / max) || animal.Age > Random.Next(5, 20);
+                    bool dies = animal.Weight < animal.MinWeight || k < ((1.0 * animals) / (1.0 * max)) || animal.Age > Random.Next(5, 20);
 
                     if (dies)
                     {
-                        this.savannah.Remove(animal);
+                        this.savannah.Destroy(animal);
                         continue;
                     }
 
@@ -100,58 +100,17 @@ namespace SavannahGame
                                 continue;
                             }
 
-                            Grass grass = this.savannah.GetGrass(y, x);
-                            Animal other = this.savannah.GetAnimal(y, x);
-                            var tile = new Tile(grass, other);
-
-                            animal.Visit(tile);
+                            Grass grass = this.savannah.Grasses[y, x];
+                            Animal other = this.savannah.Animals[y, x];
+                            
+                            animal.Meet(grass);
+                            animal.Meet(other);
                         }
                     }
 
                     this.updatedAnimals.Add(animal);
                 }
             }
-
-            // Cleanup phase.
-            for (int row = 0; row < this.savannah.Rows; row++)
-            {
-                for (int column = 0; column < this.savannah.Columns; column++)
-                {
-                    Animal animal = this.savannah.GetAnimal(row, column);
-
-                    if (animal == null)
-                    {
-                        continue;
-                    }
-
-                    if (animal.IsAlive == false)
-                    {
-                        this.savannah.Remove(animal);
-                    }
-                }
-            }
-        }
-    }
-
-    class Tile
-    {
-        private readonly Grass grass;
-        private readonly Animal animal;
-
-        public Tile(Grass grass, Animal animal)
-        {
-            this.grass = grass;
-            this.animal = animal;
-        }
-
-        public Grass Grass
-        {
-            get { return this.grass; }
-        }
-
-        public Animal Animal
-        {
-            get { return this.animal; }
         }
     }
 }

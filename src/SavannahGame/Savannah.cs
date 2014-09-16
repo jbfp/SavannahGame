@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace SavannahGame
 {
-    class Savannah : IAnimalMediator
+    public class Savannah : IFoodChain
     {
         public const int Size = 20;
 
@@ -32,7 +29,7 @@ namespace SavannahGame
                     {
                         this.animals[row, column] = new Lion(this, gender);
                     }
-                    else if (x < 0.10)
+                    else if (x < 0.20)
                     {
                         this.animals[row, column] = new Rabbit(this, gender);
                     }
@@ -50,12 +47,17 @@ namespace SavannahGame
             get { return Size; }
         }
 
-        public IReadOnlyCollection<Animal> Animals
+        public Animal[,] Animals
         {
-            get { return this.animals.OfType<Animal>().ToList().AsReadOnly(); }
+            get { return this.animals; }
         }
 
-        public void Add<T>(T animal) where T : Animal
+        public Grass[,] Grasses
+        {
+            get { return this.savannah; }
+        }
+
+        public void Spawn<T>(T animal) where T : Animal
         {
             int column = this.random.Next(0, Size);
             int row = this.random.Next(0, Size);
@@ -66,7 +68,7 @@ namespace SavannahGame
             }
         }
 
-        public void Remove<T>(T animal) where T : Animal
+        public void Destroy<T>(T animal) where T : Animal
         {
             if (animal == null)
             {
@@ -77,22 +79,12 @@ namespace SavannahGame
             {
                 for (int column = 0; column < Size; column++)
                 {
-                    if (GetAnimal(row, column) == animal)
+                    if (this.animals[row, column] == animal)
                     {
                         this.animals[row, column] = null;
                     }
                 }
             }
-        }
-
-        public Grass GetGrass(int row, int column)
-        {
-            return this.savannah[row, column];
-        }
-
-        public Animal GetAnimal(int row, int column)
-        {
-            return this.animals[row, column];
         }
 
         public void Move(Animal animal, int dr, int dc)
@@ -106,7 +98,7 @@ namespace SavannahGame
             {
                 for (int column = 0; column < Size; column++)
                 {
-                    if (GetAnimal(row, column) == animal)
+                    if (this.animals[row, column] == animal)
                     {
                         int newRow = row + dr;
                         int newColumn = column + dc;
@@ -116,7 +108,7 @@ namespace SavannahGame
                             return;
                         }
 
-                        if (GetAnimal(newRow, newColumn) != null)
+                        if (this.animals[newRow, newColumn] != null)
                         {
                             return;
                         }
@@ -127,11 +119,6 @@ namespace SavannahGame
                     }
                 }
             }
-        }
-
-        public SavannahState GetCurrenState()
-        {
-            return new SavannahState(this.savannah, this.animals);
         }
     }
 }

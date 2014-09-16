@@ -2,13 +2,13 @@
 
 namespace SavannahGame
 {
-    class Lion : Animal
+    public class Lion : Animal
     {
         private static readonly Random Random = new Random();
         
-        private readonly IAnimalMediator mediator;
+        private readonly IFoodChain mediator;
 
-        public Lion(IAnimalMediator mediator, Gender gender)
+        public Lion(IFoodChain mediator, Gender gender)
             : base(gender, 50.0)
         {
             if (mediator == null)
@@ -29,41 +29,31 @@ namespace SavannahGame
             get { return 15.0; }
         }
 
-        public override void Visit(Tile tile)
-        {
-        }
-
         public void Eat(Rabbit rabbit)
         {
             GainWeight(rabbit.Weight * 0.75);
         }
 
-        public void Meet(Lion lion)
+        public override void Meet(Animal animal)
         {
-            if (lion == null)
+            if (animal is Lion)
             {
-                throw new ArgumentNullException("lion");
+                if (animal.Gender == Gender)
+                {
+                    return;
+                }
+
+                var gender = (Gender)Random.Next(0, 2);
+                var cub = new Lion(this.mediator, gender);
+                this.mediator.Spawn(cub); 
+            }
+            else if (animal is Rabbit)
+            {
+                GainWeight(animal.Weight * 1.0);
+                this.mediator.Destroy(animal);    
             }
 
-            if (lion.Gender == Gender)
-            {
-                return;
-            }
-
-            var gender = (Gender) Random.Next(0, 2);
-            var cub = new Lion(this.mediator, gender);
-            this.mediator.Add(cub);
-        }
-
-        public void Meet(Rabbit rabbit)
-        {
-            if (rabbit == null)
-            {
-                throw new ArgumentNullException("rabbit");
-            }
-
-            GainWeight(rabbit.Weight * 1.0);
-            this.mediator.Remove(rabbit);
+            base.Meet(animal);
         }
     }
 }

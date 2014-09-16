@@ -1,6 +1,6 @@
 ﻿namespace SavannahGame
 {
-    enum Gender
+    public enum Gender
     {
         Male,
         Female

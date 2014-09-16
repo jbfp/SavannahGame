@@ -1,6 +1,6 @@
 ﻿namespace SavannahGame
 {
-    class Grass
+    public class Grass
     {
         private readonly int ttl;
 
