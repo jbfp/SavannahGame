@@ -47,10 +47,11 @@ namespace SavannahGame
                 var cub = new Lion(this.mediator, gender);
                 this.mediator.Spawn(cub); 
             }
-            else if (animal is Rabbit)
+            else if (animal is Rabbit && animal.IsAlive)
             {
                 GainWeight(animal.Weight * 1.0);
-                this.mediator.Destroy(animal);    
+                animal.Deactivate();
+                //this.mediator.Destroy(animal);
             }
 
             base.Meet(animal);

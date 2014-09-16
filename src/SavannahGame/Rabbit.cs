@@ -50,7 +50,7 @@ namespace SavannahGame
                     return;
                 }
 
-                var gender = (Gender)Random.Next(0, 2);
+                var gender = (Gender) Random.Next(0, 2);
                 var bunny = new Rabbit(this.mediator, gender);
                 this.mediator.Spawn(bunny);
             }

@@ -1,54 +1,91 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Timer = System.Threading.Timer;
 
 namespace SavannahGame.Forms
 {
     public partial class GameForm : Form
     {
         private readonly Game game;
-        private readonly Timer timer;
-        private readonly Bitmap sand;
-        private readonly Bitmap grass;
-        private readonly Bitmap lion;
-        private readonly Bitmap rabbit;
+        private readonly Thread loop;
+
+        private Bitmap sand;
+        private Bitmap grass;
+        private Bitmap grassCut;
+        private Bitmap lion;
+        private Bitmap rabbit;
+        private Bitmap cross;
+        private Bitmap circle;
+
+        private int delay;
+        private int steps;
 
         public GameForm(Game game)
         {
             this.game = game;
-            this.timer = new Timer(Tick, null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(2));
-            this.sand = new Bitmap("Content/sand.png");
-            this.grass = new Bitmap("Content/grass.png");
-            this.lion = new Bitmap("Content/lion.png");
-            this.rabbit = new Bitmap("Content/rabbit.png");
+            this.loop = new Thread(Tick);
+
             InitializeComponent();
         }
 
-        private void Tick(object state)
+        protected override void OnLoad(EventArgs e)
         {
-            game.Tick();
-            savannahPictureBox.Invalidate();
+            this.sand = new Bitmap("Content/sand.png");
+            this.grass = new Bitmap("Content/grass.png");
+            this.grassCut = new Bitmap("Content/grass_cut.png");
+            this.lion = new Bitmap("Content/lion.png");
+            this.rabbit = new Bitmap("Content/rabbit.png");
+            this.cross = new Bitmap("Content/cross.png");
+            this.circle = new Bitmap("Content/circle.png");
+            this.stepsTrackBar.Value = this.steps = this.stepsTrackBar.Minimum;
+            this.delayTrackBar.Value = this.delay = this.delayTrackBar.Minimum;
+            this.loop.Start();
+            base.OnLoad(e);
+        }
+
+        private async void Tick()
+        {
+            while (true)
+            {
+                try
+                {
+                    var tasks = this.game.TickAsync();
+
+                    foreach (var task in tasks)
+                    {
+                        await task;
+                        savannahPictureBox.Invalidate();
+                        await Task.Delay(TimeSpan.FromMilliseconds(this.delay));
+                    }
+                }
+                catch
+                {
+                    break;
+                }
+            }
         }
 
         private void savannahPictureBox_Paint(object sender, PaintEventArgs e)
         {
             const int size = 32;
-            const int padding = 1;
+            const int padding = 0;
 
             for (int row = 0; row < game.Savannah.Rows; row++)
             {
                 for (int column = 0; column < game.Savannah.Columns; column++)
                 {
-                    var grass = this.game.Savannah.Grasses[row, column];
                     var rectangle = new Rectangle((size + padding) * column, (size + padding) * row, size, size);
 
                     e.Graphics.DrawImage(this.sand, rectangle);
-                    
-                    if (grass.IsAlive)
+
+                    if (this.game.Savannah.Grasses[row, column].IsAlive)
                     {
                         e.Graphics.DrawImage(this.grass, rectangle);
                     }
@@ -60,13 +97,12 @@ namespace SavannahGame.Forms
                         continue;
                     }
 
-                    if (animal is Lion)
+                    Bitmap animalImage = animal is Lion ? this.lion : this.rabbit;              
+                    e.Graphics.DrawImage(animalImage, rectangle);
+
+                    if (animal.IsAlive == false)
                     {
-                        e.Graphics.DrawImage(this.lion, rectangle);
-                    }
-                    else if (animal is Rabbit)
-                    {
-                        e.Graphics.DrawImage(this.rabbit, rectangle);
+                        e.Graphics.DrawImage(this.cross, rectangle);
                     }
                 }
             }
@@ -76,9 +112,24 @@ namespace SavannahGame.Forms
         {
             this.sand.Dispose();
             this.grass.Dispose();
+            this.grassCut.Dispose();
             this.lion.Dispose();
             this.rabbit.Dispose();
+            this.cross.Dispose();
+            this.circle.Dispose();
             base.OnClosing(e);
+        }
+
+        private void delayTrackBar_ValueChanged(object sender, EventArgs e)
+        {
+            this.delay = this.delayTrackBar.Value;
+            this.delayLabel.Text = this.delay.ToString("0,0 ms");
+        }
+
+        private void stepsTrackBar_ValueChanged(object sender, EventArgs e)
+        {
+            this.steps = this.stepsTrackBar.Value;
+            this.stepsLabel.Text = this.steps.ToString("N0");
         }
     }
 }

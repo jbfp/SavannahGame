@@ -75,16 +75,18 @@ namespace SavannahGame
                 throw new ArgumentNullException("animal");
             }
 
-            for (int row = 0; row < Size; row++)
-            {
-                for (int column = 0; column < Size; column++)
-                {
-                    if (this.animals[row, column] == animal)
-                    {
-                        this.animals[row, column] = null;
-                    }
-                }
-            }
+            animal.Deactivate();
+
+            //for (int row = 0; row < Size; row++)
+            //{
+            //    for (int column = 0; column < Size; column++)
+            //    {
+            //        if (this.animals[row, column] == animal)
+            //        {
+            //            this.animals[row, column] = null;
+            //        }
+            //    }
+            //}
         }
 
         public void Move(Animal animal, int dr, int dc)
@@ -116,6 +118,25 @@ namespace SavannahGame
                         this.animals[row, column] = null;
                         this.animals[newRow, newColumn] = animal;
                         return;
+                    }
+                }
+            }
+        }
+
+        public void Remove(Animal animal)
+        {
+            if (animal == null)
+            {
+                throw new ArgumentNullException("animal");
+            }
+
+            for (int row = 0; row < Size; row++)
+            {
+                for (int column = 0; column < Size; column++)
+                {
+                    if (this.animals[row, column] == animal)
+                    {
+                        this.animals[row, column] = null;
                     }
                 }
             }

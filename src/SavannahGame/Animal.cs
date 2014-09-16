@@ -7,6 +7,7 @@
         protected Animal(Gender gender, double weight)
         {
             this.gender = gender;
+            IsAlive = true;
             GainWeight(weight);
         }
 
@@ -15,6 +16,7 @@
             get { return this.gender; }
         }
 
+        public bool IsAlive { get; private set; }
         public double Weight { get; private set; }
         public int Age { get; private set; }
 
@@ -42,6 +44,11 @@
 
         public virtual void Meet(Animal animal)
         {
+        }
+
+        public void Deactivate()
+        {
+            IsAlive = false;
         }
     }
 }
