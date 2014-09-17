@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +20,7 @@ namespace SavannahGame.Forms
         private Bitmap rabbit;
         private Bitmap cross;
         private Bitmap circle;
+        private Font font;
 
         private int delay;
         private int steps;
@@ -44,6 +42,7 @@ namespace SavannahGame.Forms
             this.rabbit = new Bitmap("Content/rabbit.png");
             this.cross = new Bitmap("Content/cross.png");
             this.circle = new Bitmap("Content/circle.png");
+            this.font = new Font("Arial", 8);
             this.stepsTrackBar.Value = this.steps = this.stepsTrackBar.Minimum;
             this.delayTrackBar.Value = this.delay = this.delayTrackBar.Minimum;
             this.loop.Start();
@@ -117,6 +116,7 @@ namespace SavannahGame.Forms
             this.rabbit.Dispose();
             this.cross.Dispose();
             this.circle.Dispose();
+            this.font.Dispose();
             base.OnClosing(e);
         }
 

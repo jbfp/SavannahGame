@@ -39,6 +39,11 @@ namespace SavannahGame
                 yield return task;
             }
 
+            foreach (var task in GrowAsync())
+            {
+                yield return task;
+            }
+
             foreach (var task in ActAsync())
             {
                 yield return task;
@@ -79,16 +84,29 @@ namespace SavannahGame
             }
         }
 
-        private IEnumerable<Task> ActAsync()
+        private IEnumerable<Task> GrowAsync()
         {
+            var tasks = new List<Task>();
+
             for (int row = 0; row < this.savannah.Rows; row++)
             {
                 for (int column = 0; column < this.savannah.Columns; column++)
                 {
                     // Update grass.
                     var grass = this.savannah.Grasses[row, column];
-                    yield return Task.Run(() => grass.Tick());
+                    tasks.Add(Task.Run(() => grass.Tick()));
+                }
+            }
 
+            yield return Task.WhenAll(tasks);
+        }
+
+        private IEnumerable<Task> ActAsync()
+        {
+            for (int row = 0; row < this.savannah.Rows; row++)
+            {
+                for (int column = 0; column < this.savannah.Columns; column++)
+                {
                     Animal animal = this.savannah.Animals[row, column];
 
                     if (animal == null)

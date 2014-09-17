@@ -20,7 +20,7 @@ namespace SavannahGame
             {
                 for (int column = 0; column < Columns; column++)
                 {
-                    this.savannah[row, column] = new Grass(this.random.NextDouble() < 0.50, this.random.Next(5, 15));
+                    this.savannah[row, column] = new Grass(this.random.NextDouble() < 0.50, this.random.Next(1, 15));
 
                     double x = this.random.NextDouble();
                     var gender = (Gender) this.random.Next(0, 2);

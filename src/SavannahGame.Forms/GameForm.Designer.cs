@@ -65,10 +65,10 @@
             this.delayTrackBar.LargeChange = 100;
             this.delayTrackBar.Location = new System.Drawing.Point(389, 723);
             this.delayTrackBar.Maximum = 2000;
-            this.delayTrackBar.Minimum = 100;
+            this.delayTrackBar.Minimum = 50;
             this.delayTrackBar.Name = "delayTrackBar";
             this.delayTrackBar.Size = new System.Drawing.Size(256, 45);
-            this.delayTrackBar.SmallChange = 100;
+            this.delayTrackBar.SmallChange = 50;
             this.delayTrackBar.TabIndex = 2;
             this.delayTrackBar.TickFrequency = 100;
             this.delayTrackBar.Value = 100;
