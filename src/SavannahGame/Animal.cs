@@ -16,6 +16,9 @@
             get { return this.gender; }
         }
 
+        public int X { get; set; }
+        public int Y { get; set; }
+
         public bool IsAlive { get; private set; }
         public double Weight { get; private set; }
         public int Age { get; private set; }
@@ -50,5 +53,7 @@
         {
             IsAlive = false;
         }
+
+        public abstract void Accept(IAnimalVisitor visitor);
     }
 }

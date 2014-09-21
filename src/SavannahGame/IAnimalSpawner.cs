@@ -1,8 +1,7 @@
 namespace SavannahGame
 {
-    public interface IFoodChain
+    public interface IAnimalSpawner
     {
         void Spawn<T>(T animal) where T : Animal;
-        void Destroy<T>(T animal) where T : Animal;
     }
 }

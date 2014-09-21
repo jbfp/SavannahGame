@@ -6,9 +6,9 @@ namespace SavannahGame
     {
         private static readonly Random Random = new Random();
         
-        private readonly IFoodChain mediator;
+        private readonly IAnimalSpawner mediator;
 
-        public Lion(IFoodChain mediator, Gender gender)
+        public Lion(IAnimalSpawner mediator, Gender gender)
             : base(gender, 50.0)
         {
             if (mediator == null)
@@ -43,18 +43,25 @@ namespace SavannahGame
                     return;
                 }
 
-                var gender = (Gender)Random.Next(0, 2);
-                var cub = new Lion(this.mediator, gender);
-                this.mediator.Spawn(cub); 
+                for (int i = 0; i < 2; i++)
+                {
+                    var gender = (Gender) Random.Next(0, 2);
+                    var cub = new Lion(this.mediator, gender);
+                    this.mediator.Spawn(cub);
+                }
             }
             else if (animal is Rabbit && animal.IsAlive)
             {
                 GainWeight(animal.Weight * 1.0);
                 animal.Deactivate();
-                //this.mediator.Destroy(animal);
             }
 
             base.Meet(animal);
+        }
+
+        public override void Accept(IAnimalVisitor visitor)
+        {
+            visitor.Visit(this);
         }
     }
 }

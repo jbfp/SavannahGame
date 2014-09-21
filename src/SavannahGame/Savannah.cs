@@ -1,126 +1,93 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SavannahGame
 {
-    public class Savannah : IFoodChain
+    public class Savannah : IAnimalSpawner
     {
-        public const int Size = 20;
-
+        private readonly int rows;
+        private readonly int columns;
+        private readonly Grass[,] savannah;
         private readonly Animal[,] animals;
         private readonly Random random;
-        private readonly Grass[,] savannah;
 
-        public Savannah()
+        public Savannah(int rows, int columns)
         {
+            this.rows = rows;
+            this.columns = columns;
+            this.savannah = new Grass[this.rows, this.columns];
+            this.animals = new Animal[this.rows, this.columns];
             this.random = new Random();
-            this.savannah = new Grass[Rows, Columns];
-            this.animals = new Animal[Rows, Columns];
 
-            for (int row = 0; row < Rows; row++)
+            for (int row = 0; row < this.rows; row++)
             {
-                for (int column = 0; column < Columns; column++)
+                for (int column = 0; column < this.columns; column++)
                 {
-                    this.savannah[row, column] = new Grass(this.random.NextDouble() < 0.50, this.random.Next(1, 15));
+                    this.savannah[row, column] = new Grass(this.random.Next(1, 15), this.random.NextDouble() < 0.50, column, row);
+                }
+            }
 
-                    double x = this.random.NextDouble();
-                    var gender = (Gender) this.random.Next(0, 2);
-
-                    if (x < 0.05)
-                    {
-                        this.animals[row, column] = new Lion(this, gender);
-                    }
-                    else if (x < 0.20)
-                    {
-                        this.animals[row, column] = new Rabbit(this, gender);
-                    }
+            for (int i = 0; i < NumTiles; i++)
+            {
+                double x = this.random.NextDouble();
+                var gender = (Gender) this.random.Next(0, 2);
+                
+                if (x < 0.05)
+                {
+                    Spawn(new Lion(this, gender));
+                }
+                else if (x < 0.20)
+                {
+                    Spawn(new Rabbit(this, gender));
                 }
             }
         }
-
-        public int Rows
+        
+        public int NumTiles
         {
-            get { return Size; }
+            get { return this.rows * this.columns; }
         }
 
-        public int Columns
+        public IReadOnlyCollection<Grass> Grasses
         {
-            get { return Size; }
+            get { return this.savannah.OfType<Grass>().ToList().AsReadOnly(); }
         }
 
-        public Animal[,] Animals
+        public IReadOnlyCollection<Animal> Animals
         {
-            get { return this.animals; }
-        }
-
-        public Grass[,] Grasses
-        {
-            get { return this.savannah; }
+            get { return this.animals.OfType<Animal>().ToList().AsReadOnly(); }
         }
 
         public void Spawn<T>(T animal) where T : Animal
         {
-            int column = this.random.Next(0, Size);
-            int row = this.random.Next(0, Size);
+            int row = this.random.Next(0, this.rows);
+            int column = this.random.Next(0, this.columns);            
 
             if (this.animals[row, column] == null)
             {
                 this.animals[row, column] = animal;
+                animal.Y = row;
+                animal.X = column;                
             }
         }
 
-        public void Destroy<T>(T animal) where T : Animal
+        public void Move(Animal animal, int row, int column)
         {
-            if (animal == null)
-            {
-                throw new ArgumentNullException("animal");
-            }
-
-            animal.Deactivate();
-
-            //for (int row = 0; row < Size; row++)
-            //{
-            //    for (int column = 0; column < Size; column++)
-            //    {
-            //        if (this.animals[row, column] == animal)
-            //        {
-            //            this.animals[row, column] = null;
-            //        }
-            //    }
-            //}
-        }
-
-        public void Move(Animal animal, int dr, int dc)
-        {
-            if (dr == 0 && dc == 0)
+            if (column < 0 || column >= this.columns || row < 0 || row >= this.rows)
             {
                 return;
             }
 
-            for (int row = 0; row < Size; row++)
+            if (Animals.Any(a => a.X == column && a.Y == row))
             {
-                for (int column = 0; column < Size; column++)
-                {
-                    if (this.animals[row, column] == animal)
-                    {
-                        int newRow = row + dr;
-                        int newColumn = column + dc;
-
-                        if ((newRow < 0 || newRow >= Size) || (newColumn < 0 || newColumn >= Size))
-                        {
-                            return;
-                        }
-
-                        if (this.animals[newRow, newColumn] != null)
-                        {
-                            return;
-                        }
-
-                        this.animals[row, column] = null;
-                        this.animals[newRow, newColumn] = animal;
-                        return;
-                    }
-                }
+                return;
             }
+
+            this.animals[animal.Y, animal.X] = null;
+            this.animals[row, column] = animal;
+            animal.X = column;
+            animal.Y = row;
         }
 
         public void Remove(Animal animal)
@@ -130,16 +97,7 @@ namespace SavannahGame
                 throw new ArgumentNullException("animal");
             }
 
-            for (int row = 0; row < Size; row++)
-            {
-                for (int column = 0; column < Size; column++)
-                {
-                    if (this.animals[row, column] == animal)
-                    {
-                        this.animals[row, column] = null;
-                    }
-                }
-            }
+            this.animals[animal.Y, animal.X] = null;
         }
     }
 }

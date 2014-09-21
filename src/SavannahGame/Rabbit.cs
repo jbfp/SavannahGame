@@ -6,9 +6,9 @@ namespace SavannahGame
     {
         private static readonly Random Random = new Random();
 
-        private readonly IFoodChain mediator;
+        private readonly IAnimalSpawner mediator;
 
-        public Rabbit(IFoodChain mediator, Gender gender)
+        public Rabbit(IAnimalSpawner mediator, Gender gender)
             : base(gender, 15.0)
         {
             this.mediator = mediator;
@@ -50,12 +50,20 @@ namespace SavannahGame
                     return;
                 }
 
-                var gender = (Gender) Random.Next(0, 2);
-                var bunny = new Rabbit(this.mediator, gender);
-                this.mediator.Spawn(bunny);
+                for (int i = 0; i < 2; i++)
+                {
+                    var gender = (Gender) Random.Next(0, 2);
+                    var bunny = new Rabbit(this.mediator, gender);
+                    this.mediator.Spawn(bunny);
+                }
             }
 
             base.Meet(animal);
+        }
+
+        public override void Accept(IAnimalVisitor visitor)
+        {
+            visitor.Visit(this);
         }
     }
 }
