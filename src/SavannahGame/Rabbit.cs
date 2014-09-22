@@ -9,7 +9,7 @@ namespace SavannahGame
         private readonly IAnimalSpawner mediator;
 
         public Rabbit(IAnimalSpawner mediator, Gender gender)
-            : base(gender, 15.0)
+            : base(gender, 7.5)
         {
             this.mediator = mediator;
         }
@@ -19,7 +19,7 @@ namespace SavannahGame
             get { return 2; }
         }
 
-        public override double MinWeight
+        protected override double MinWeight
         {
             get { return 2.5; }
         }

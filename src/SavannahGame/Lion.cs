@@ -9,7 +9,7 @@ namespace SavannahGame
         private readonly IAnimalSpawner mediator;
 
         public Lion(IAnimalSpawner mediator, Gender gender)
-            : base(gender, 50.0)
+            : base(gender, 25.0)
         {
             if (mediator == null)
             {
@@ -19,15 +19,15 @@ namespace SavannahGame
             this.mediator = mediator;
         }
 
-        public override int Moves
-        {
-            get { return 1; }
-        }
-
-        public override double MinWeight
+        protected override double MinWeight
         {
             get { return 15.0; }
         }
+
+        public override int Moves
+        {
+            get { return 1; }
+        }        
 
         public override void Visit(Lion lion)
         {

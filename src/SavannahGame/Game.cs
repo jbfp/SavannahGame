@@ -95,7 +95,7 @@ namespace SavannahGame
             int max = this.savannah.NumTiles;
             int animals = this.savannah.Animals.Count(a => a.GetType() == animal.GetType());
             double k = Random.NextDouble();
-            bool dies = animal.Weight < animal.MinWeight || k < ((1.0 * animals) / (1.0 * max)) || animal.Age > Random.Next(5, 20);
+            bool dies = k < ((1.0 * animals) / (1.0 * max)) || animal.Age > Random.Next(5, 20);
 
             if (dies)
             {

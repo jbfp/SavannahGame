@@ -19,26 +19,47 @@
         public int X { get; set; }
         public int Y { get; set; }
 
+        protected abstract double MinWeight { get; }
+
         public bool IsAlive { get; private set; }
         public double Weight { get; private set; }
         public int Age { get; private set; }
 
         public abstract int Moves { get; }
-        public abstract double MinWeight { get; }
 
         public void GetOlder()
         {
+            if (IsAlive == false)
+            {
+                return;
+            }
+
             Age++;
         }
 
         public void GainWeight(double weightGained)
         {
+            if (IsAlive == false)
+            {
+                return;
+            }
+
             Weight += weightGained;
         }
 
         public void LoseWeight(double weightLost)
         {
+            if (IsAlive == false)
+            {
+                return;
+            }
+
             Weight -= weightLost;
+
+            if (Weight < MinWeight)
+            {
+                Deactivate();
+            }
         }
 
         public void Deactivate()
