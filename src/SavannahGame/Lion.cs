@@ -29,34 +29,33 @@ namespace SavannahGame
             get { return 15.0; }
         }
 
-        public void Eat(Rabbit rabbit)
+        public override void Visit(Lion lion)
         {
-            GainWeight(rabbit.Weight * 0.75);
+            if (lion.Gender == Gender)
+            {
+                return;
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                var gender = (Gender) Random.Next(0, 2);
+                var cub = new Lion(this.mediator, gender);
+                this.mediator.Spawn(cub);
+            }
+
+            base.Visit(lion);
         }
 
-        public override void Meet(Animal animal)
+        public override void Visit(Rabbit rabbit)
         {
-            if (animal is Lion)
+            if (rabbit.IsAlive == false)
             {
-                if (animal.Gender == Gender)
-                {
-                    return;
-                }
-
-                for (int i = 0; i < 2; i++)
-                {
-                    var gender = (Gender) Random.Next(0, 2);
-                    var cub = new Lion(this.mediator, gender);
-                    this.mediator.Spawn(cub);
-                }
-            }
-            else if (animal is Rabbit && animal.IsAlive)
-            {
-                GainWeight(animal.Weight * 1.0);
-                animal.Deactivate();
+                return;
             }
 
-            base.Meet(animal);
+            GainWeight(rabbit.Weight * 1.0);
+            rabbit.Deactivate();
+            base.Visit(rabbit);
         }
 
         public override void Accept(IAnimalVisitor visitor)

@@ -1,6 +1,6 @@
 ﻿namespace SavannahGame
 {
-    public abstract class Animal
+    public abstract class Animal : ISavannahVisitor, IAnimalVisitor
     {
         private readonly Gender gender;
 
@@ -41,17 +41,21 @@
             Weight -= weightLost;
         }
 
-        public virtual void Meet(Grass grass)
-        {
-        }
-
-        public virtual void Meet(Animal animal)
-        {
-        }
-
         public void Deactivate()
         {
             IsAlive = false;
+        }
+
+        public virtual void Visit(Grass grass)
+        {
+        }
+
+        public virtual void Visit(Lion lion)
+        {
+        }
+
+        public virtual void Visit(Rabbit rabbit)
+        {
         }
 
         public abstract void Accept(IAnimalVisitor visitor);

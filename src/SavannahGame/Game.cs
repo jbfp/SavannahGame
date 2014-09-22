@@ -115,12 +115,12 @@ namespace SavannahGame
 
                     if (neighbourGrass!= null)
                     {
-                        yield return () => animal.Meet(neighbourGrass);
+                        yield return () => animal.Visit(neighbourGrass);
                     }
 
                     if (neighbourAnimal != null)
                     {
-                        yield return () => animal.Meet(neighbourAnimal);
+                        yield return () => animal.Accept(neighbourAnimal);
                     }
                 }
             }

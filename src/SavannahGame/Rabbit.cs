@@ -24,41 +24,38 @@ namespace SavannahGame
             get { return 2.5; }
         }
 
-        public override void Meet(Grass grass)
+        public override void Visit(Grass grass)
         {
             if (grass == null)
             {
                 throw new ArgumentNullException("grass");
             }
 
-            if (!grass.IsAlive)
+            if (grass.IsAlive == false)
             {
                 return;
             }
 
             GainWeight(1.00);
             grass.Deactivate();
-            base.Meet(grass);
+            base.Visit(grass);
         }
 
-        public override void Meet(Animal animal)
+        public override void Visit(Rabbit rabbit)
         {
-            if (animal is Rabbit)
+            if (rabbit.Gender == Gender)
             {
-                if (animal.Gender == Gender)
-                {
-                    return;
-                }
-
-                for (int i = 0; i < 2; i++)
-                {
-                    var gender = (Gender) Random.Next(0, 2);
-                    var bunny = new Rabbit(this.mediator, gender);
-                    this.mediator.Spawn(bunny);
-                }
+                return;
             }
 
-            base.Meet(animal);
+            for (int i = 0; i < 2; i++)
+            {
+                var gender = (Gender)Random.Next(0, 2);
+                var bunny = new Rabbit(this.mediator, gender);
+                this.mediator.Spawn(bunny);
+            }
+
+            base.Visit(rabbit);
         }
 
         public override void Accept(IAnimalVisitor visitor)
