@@ -115,7 +115,7 @@ namespace SavannahGame
 
                     if (neighbourGrass!= null)
                     {
-                        yield return () => animal.Visit(neighbourGrass);
+                        yield return () => neighbourGrass.Accept(animal);
                     }
 
                     if (neighbourAnimal != null)
