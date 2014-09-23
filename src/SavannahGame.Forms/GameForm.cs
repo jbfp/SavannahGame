@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
@@ -13,10 +12,10 @@ namespace SavannahGame.Forms
         private const int Columns = 20;
 
         private readonly Game game;
-        private readonly Dictionary<string, Image> textures; 
-        private readonly Thread loop;
-        private readonly AutoResetEvent are;
+        private readonly Dictionary<string, Image> textures;
         private readonly CancellationTokenSource cts;
+        private readonly AutoResetEvent are;
+        private readonly Thread loop;
         
         private int delay;
 
@@ -78,22 +77,6 @@ namespace SavannahGame.Forms
             this.are.Set();
         }
 
-        protected override void OnClosing(CancelEventArgs e)
-        {            
-            this.cts.Cancel();
-            this.loop.Join();
-
-            foreach (var image in textures.Values)
-            {
-                image.Dispose();
-            }
-
-            this.textures.Clear();
-            this.are.Dispose();
-            this.cts.Dispose();
-            base.OnClosing(e);
-        }
-
         private void delayTrackBar_ValueChanged(object sender, EventArgs e)
         {
             this.delay = this.delayTrackBar.Value;
@@ -107,6 +90,31 @@ namespace SavannahGame.Forms
                 this.loop.Start();
                 this.startButton.Enabled = false;
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.cts.Cancel();
+
+                if (this.loop.IsAlive)
+                {
+                    this.loop.Join();
+                }
+
+                this.cts.Dispose();
+                this.are.Dispose();
+
+                foreach (var image in textures.Values)
+                {
+                    image.Dispose();
+                }
+
+                this.textures.Clear();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

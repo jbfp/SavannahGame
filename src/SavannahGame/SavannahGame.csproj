@@ -41,7 +41,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionExtensions.cs" />
     <Compile Include="Animal.cs" />
     <Compile Include="IAnimalVisitor.cs" />
     <Compile Include="IAnimalSpawner.cs" />

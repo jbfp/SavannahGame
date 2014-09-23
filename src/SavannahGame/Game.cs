@@ -89,7 +89,7 @@ namespace SavannahGame
             }
 
             animal.GetOlder();
-            animal.LoseWeight(animal.Weight * 0.10);
+            animal.LoseWeight(animal.Weight * 0.25);
 
             // Dies from overpopulation or starvation?
             int max = this.savannah.NumTiles;

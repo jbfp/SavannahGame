@@ -5,7 +5,6 @@ using System.Drawing.Drawing2D;
 
 namespace SavannahGame.Forms
 {
-
     public class GraphicsVisitor : IAnimalVisitor, ISavannahVisitor
     {
         private readonly Graphics graphics;

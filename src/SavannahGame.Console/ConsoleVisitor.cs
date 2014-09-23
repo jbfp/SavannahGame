@@ -21,7 +21,7 @@ namespace SavannahGame.Console
             System.Console.Write(grass.IsAlive ? "#" : "·");
         }
 
-        private void Visit<T>(T animal, char letter, ConsoleColor male, ConsoleColor female) where T : Animal
+        private static void Visit<T>(T animal, char letter, ConsoleColor male, ConsoleColor female) where T : Animal
         {
             System.Console.SetCursorPosition(animal.X, animal.Y);
 

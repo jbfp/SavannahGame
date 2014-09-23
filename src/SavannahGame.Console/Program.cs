@@ -10,7 +10,9 @@ namespace SavannahGame.Console
         {
             System.Console.CursorVisible = false;
 
-            var savannah = new Savannah(20, 20);
+            const int rows = 20;
+            const int columns = 20;
+            var savannah = new Savannah(rows, columns);
             var game = new Game(savannah);
             var visitor = new ConsoleVisitor();
 
@@ -21,9 +23,10 @@ namespace SavannahGame.Console
                 foreach (Action action in actions)
                 {
                     action();
+                    System.Console.Clear();
                     game.Accept((ISavannahVisitor) visitor);
                     game.Accept((IAnimalVisitor) visitor);
-                    Thread.Sleep(TimeSpan.FromMilliseconds(100));
+                    Thread.Sleep(TimeSpan.FromMilliseconds(1000));
                 }
             }
         }
