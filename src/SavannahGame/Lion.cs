@@ -6,17 +6,17 @@ namespace SavannahGame
     {
         private static readonly Random Random = new Random();
         
-        private readonly IAnimalSpawner mediator;
+        private readonly IAnimalSpawner spawner;
 
-        public Lion(IAnimalSpawner mediator, Gender gender)
+        public Lion(IAnimalSpawner spawner, Gender gender)
             : base(gender, 25.0)
         {
-            if (mediator == null)
+            if (spawner == null)
             {
-                throw new ArgumentNullException("mediator");
+                throw new ArgumentNullException("spawner");
             }
 
-            this.mediator = mediator;
+            this.spawner = spawner;
         }
 
         protected override double MinWeight
@@ -39,8 +39,8 @@ namespace SavannahGame
             for (int i = 0; i < 2; i++)
             {
                 var gender = (Gender) Random.Next(0, 2);
-                var cub = new Lion(this.mediator, gender);
-                this.mediator.Spawn(cub);
+                var cub = new Lion(this.spawner, gender);
+                this.spawner.Spawn(cub);
             }
 
             base.Visit(lion);

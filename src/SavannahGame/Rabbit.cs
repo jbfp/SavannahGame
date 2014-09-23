@@ -6,12 +6,12 @@ namespace SavannahGame
     {
         private static readonly Random Random = new Random();
 
-        private readonly IAnimalSpawner mediator;
+        private readonly IAnimalSpawner spawner;
 
-        public Rabbit(IAnimalSpawner mediator, Gender gender)
+        public Rabbit(IAnimalSpawner spawner, Gender gender)
             : base(gender, 7.5)
         {
-            this.mediator = mediator;
+            this.spawner = spawner;
         }
 
         public override int Moves
@@ -51,8 +51,8 @@ namespace SavannahGame
             for (int i = 0; i < 2; i++)
             {
                 var gender = (Gender)Random.Next(0, 2);
-                var bunny = new Rabbit(this.mediator, gender);
-                this.mediator.Spawn(bunny);
+                var bunny = new Rabbit(this.spawner, gender);
+                this.spawner.Spawn(bunny);
             }
 
             base.Visit(rabbit);
