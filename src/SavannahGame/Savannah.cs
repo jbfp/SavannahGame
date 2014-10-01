@@ -6,11 +6,12 @@ namespace SavannahGame
 {
     public class Savannah : IAnimalSpawner
     {
+        private static readonly Random Random = new Random();
+
         private readonly int rows;
         private readonly int columns;
         private readonly Grass[,] savannah;
         private readonly Animal[,] animals;
-        private readonly Random random;
 
         public Savannah(int rows, int columns)
         {
@@ -18,20 +19,19 @@ namespace SavannahGame
             this.columns = columns;
             this.savannah = new Grass[this.rows, this.columns];
             this.animals = new Animal[this.rows, this.columns];
-            this.random = new Random();
 
             for (int row = 0; row < this.rows; row++)
             {
                 for (int column = 0; column < this.columns; column++)
                 {
-                    this.savannah[row, column] = new Grass(this.random.Next(1, 15), this.random.NextDouble() < 0.50, column, row);
+                    this.savannah[row, column] = new Grass(Random.Next(1, 15), Random.NextDouble() < 0.50, column, row);
                 }
             }
 
             for (int i = 0; i < NumTiles; i++)
             {
-                double x = this.random.NextDouble();
-                var gender = (Gender) this.random.Next(0, 2);
+                double x = Random.NextDouble();
+                var gender = (Gender) Random.Next(0, 2);
                 
                 if (x < 0.05)
                 {
@@ -61,8 +61,8 @@ namespace SavannahGame
 
         public void Spawn<T>(T animal) where T : Animal
         {
-            int row = this.random.Next(0, this.rows);
-            int column = this.random.Next(0, this.columns);            
+            int row = Random.Next(0, this.rows);
+            int column = Random.Next(0, this.columns);            
 
             if (this.animals[row, column] == null)
             {
