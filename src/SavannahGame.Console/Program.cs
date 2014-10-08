@@ -23,11 +23,12 @@ namespace SavannahGame.Console
                 foreach (Action action in actions)
                 {
                     action();
-                    System.Console.Clear();
-                    game.Accept((ISavannahVisitor) visitor);
-                    game.Accept((IAnimalVisitor) visitor);
-                    Thread.Sleep(TimeSpan.FromMilliseconds(1000));
                 }
+
+                System.Console.Clear();
+                game.Accept((ISavannahVisitor) visitor);
+                game.Accept((IAnimalVisitor) visitor);
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
             }
         }
     }
